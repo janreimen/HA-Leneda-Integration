@@ -215,7 +215,7 @@ def _get_meter_routes(hass: HomeAssistant) -> dict[str, list[dict[str, Any]]]:
                 continue
             for meter_type in (types or []):
                 mapped_type = "production" if meter_type == "solar_consumption" else (
-                    "export" if meter_type == "export_consumption" else meter_type
+                    "export" if meter_type in ("export_consumption", "net_production") else meter_type
                 )
                 if mapped_type not in routes:
                     continue
@@ -507,7 +507,7 @@ async def _fetch_peak_and_exceedance(coordinator, start_dt: datetime, end_dt: da
             prod_results = await _aio.gather(*[
                 route["api_client"].async_get_metering_data(
                     route["meter_id"],
-                    "1-1:1.29.0" if route["meter_id"] in getattr(route["coordinator"], "solar_consumption_meters", []) else "1-1:2.29.0",
+                    route["coordinator"]._get_obis_for_meter(route["meter_id"], "1-1:2.29.0"),
                     start_dt, end_dt
                 )
                 for route in production_routes
@@ -668,14 +668,8 @@ async def _fetch_live_aggregated_data(hass: HomeAssistant, start_dt, end_dt):
 
         def get_obis_for_route(route, obis_code):
             coord = route.get("coordinator")
-            if coord and route["meter_id"] in getattr(coord, "solar_consumption_meters", []):
-                if obis_code == "1-1:2.29.0":
-                    return "1-1:1.29.0"
-                if obis_code == "1-1:4.29.0":
-                    return "1-1:3.29.0"
-            if coord and route["meter_id"] in getattr(coord, "export_consumption_meters", []):
-                if obis_code in ("1-65:2.29.9", "1-1:2.29.0"):
-                    return "1-1:1.29.0"
+            if coord:
+                return coord._get_obis_for_meter(route["meter_id"], obis_code)
             return obis_code
 
         results = await _aio.gather(*[
@@ -784,14 +778,8 @@ class LenedaTimeseriesView(HomeAssistantView):
         try:
             def get_obis_for_route(route, obis_code):
                 coord = route.get("coordinator")
-                if coord and route["meter_id"] in getattr(coord, "solar_consumption_meters", []):
-                    if obis_code == "1-1:2.29.0":
-                        return "1-1:1.29.0"
-                    if obis_code == "1-1:4.29.0":
-                        return "1-1:3.29.0"
-                if coord and route["meter_id"] in getattr(coord, "export_consumption_meters", []):
-                    if obis_code in ("1-65:2.29.9", "1-1:2.29.0"):
-                        return "1-1:1.29.0"
+                if coord:
+                    return coord._get_obis_for_meter(route["meter_id"], obis_code)
                 return obis_code
 
             all_results = await _aio.gather(*[
@@ -860,14 +848,8 @@ class LenedaPerMeterTimeseriesView(HomeAssistantView):
         try:
             def get_obis_for_route(route, obis_code):
                 coord = route.get("coordinator")
-                if coord and route["meter_id"] in getattr(coord, "solar_consumption_meters", []):
-                    if obis_code == "1-1:2.29.0":
-                        return "1-1:1.29.0"
-                    if obis_code == "1-1:4.29.0":
-                        return "1-1:3.29.0"
-                if coord and route["meter_id"] in getattr(coord, "export_consumption_meters", []):
-                    if obis_code in ("1-65:2.29.9", "1-1:2.29.0"):
-                        return "1-1:1.29.0"
+                if coord:
+                    return coord._get_obis_for_meter(route["meter_id"], obis_code)
                 return obis_code
 
             all_results = await _aio.gather(*[

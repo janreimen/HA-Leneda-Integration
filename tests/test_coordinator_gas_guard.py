@@ -162,3 +162,38 @@ async def test_advanced_gas_pack_disabled_does_not_suppress_core_gas():
     await coord._async_update_data()
     # Core gas fetching is based on has_gas, not on the sensor-pack toggle.
     assert len(_gas_metering_calls(api)) == 15
+
+
+@pytest.mark.asyncio
+async def test_net_production_meter_uses_production_obis_as_export():
+    """A net-production meter is an export source, not another PV generator."""
+    coord, api = _make_coordinator(
+        {
+            "metering_point_id": "LU-GRID-IMPORT",
+            CONF_METERING_POINT_1_TYPES: ["consumption"],
+            CONF_METERING_POINT_2: "LU-TOTAL-PRODUCTION",
+            CONF_METERING_POINT_2_TYPES: ["production"],
+            "metering_point_3": "LU-NET-PRODUCTION",
+            "metering_point_3_types": ["net_production"],
+        }
+    )
+
+    assert coord.production_meters == ["LU-TOTAL-PRODUCTION"]
+    assert coord.export_meters == ["LU-NET-PRODUCTION"]
+    assert coord.net_production_meters == ["LU-NET-PRODUCTION"]
+    assert coord._meter_for_obis("1-1:2.29.0") == "LU-TOTAL-PRODUCTION"
+    assert coord._meter_for_obis("1-65:2.29.9") == "LU-NET-PRODUCTION"
+    assert coord._meter_for_obis("1-65:2.29.1") == "LU-TOTAL-PRODUCTION"
+    assert coord._get_obis_for_meter(
+        "LU-NET-PRODUCTION", "1-65:2.29.9"
+    ) == "1-1:2.29.0"
+
+    await coord._async_update_data()
+
+    # Total production and net production are requested separately, using the
+    # same OBIS register on different metering points.
+    assert ("LU-TOTAL-PRODUCTION", "1-1:2.29.0") in api.metering_calls
+    assert ("LU-NET-PRODUCTION", "1-1:2.29.0") in api.metering_calls
+    assert ("LU-NET-PRODUCTION", "1-1:2.29.0") in api.aggregated_calls
+    assert ("LU-NET-PRODUCTION", "1-65:2.29.9") not in api.aggregated_calls
+    assert ("LU-TOTAL-PRODUCTION", "1-65:2.29.1") in api.aggregated_calls

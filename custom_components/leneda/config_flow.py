@@ -74,6 +74,7 @@ def _build_meter_type_selector() -> sel.SelectSelector:
                 {"value": "solar_consumption", "label": "Solar production (consumption-metered)"},
                 {"value": "export", "label": "Grid export"},
                 {"value": "export_consumption", "label": "Grid export (consumption-metered)"},
+                {"value": "net_production", "label": "Net production / surplus export (production-metered)"},
                 {"value": "gas", "label": "Gas"},
             ],
             multiple=True,

@@ -64,6 +64,14 @@ async def async_setup_entry(
             return coordinator._meter_for_obis(key)
         if key.startswith("c_"):
             return consumption_meter_id
+        if key in {
+            "p_09_yesterday_exported",
+            "p_10_last_week_exported",
+            "p_11_last_month_exported",
+            "p_15_monthly_exported",
+            "p_17_weekly_exported",
+        }:
+            return coordinator.export_meter
         if key.startswith(("p_", "s_")):
             return production_meter_id
         if key.startswith(("g_", "7-")):

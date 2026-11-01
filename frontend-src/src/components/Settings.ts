@@ -156,7 +156,7 @@ function isSectionOpen(title: string, defaults: Set<string>): boolean {
 
 // ── Helpers ──────────────────────────────────────────────────────
 
-const METER_ROLE_ORDER: MeterType[] = ["consumption", "production", "solar_consumption", "export", "export_consumption", "gas"];
+const METER_ROLE_ORDER: MeterType[] = ["consumption", "production", "solar_consumption", "export", "export_consumption", "net_production", "gas"];
 
 const TYPE_LABELS: Record<MeterType, string> = {
   consumption: "Consumption",
@@ -164,6 +164,7 @@ const TYPE_LABELS: Record<MeterType, string> = {
   solar_consumption: "Solar production (consumption-metered)",
   export: "Grid export",
   export_consumption: "Grid export (consumption-metered)",
+  net_production: "Net production / surplus export (production-metered)",
   gas: "Gas",
 };
 
@@ -173,6 +174,7 @@ const TYPE_ICONS: Record<MeterType, string> = {
   solar_consumption: "☀️",
   export: "",
   export_consumption: "",
+  net_production: "",
   gas: "🔥",
 };
 
@@ -182,6 +184,7 @@ const TYPE_DESCRIPTIONS: Record<MeterType, string> = {
   solar_consumption: "Solar production measured as consumption",
   export: "Export-only meter for energy sold/sent to the grid",
   export_consumption: "Grid export measured on the consumption register (active consumption OBIS)",
+  net_production: "Surplus after household use, reported on the production register (1-1:2.29.0)",
   gas: "Gas consumption meter",
 };
 

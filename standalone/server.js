@@ -232,11 +232,12 @@ function productionMeterIds(creds) {
   ];
 }
 
-/** Return all meter IDs that act as export (includes export_consumption). */
+/** Return all meter IDs that act as export (including special OBIS roles). */
 function exportMeterIds(creds) {
   return [
     ...metersOfType(creds, "export"),
     ...metersOfType(creds, "export_consumption"),
+    ...metersOfType(creds, "net_production"),
   ];
 }
 
@@ -258,6 +259,9 @@ function getObisForMeterId(meterId, obisCode, creds) {
     if (obisCode === "1-65:2.29.9" || obisCode === "1-1:2.29.0") {
       return "1-1:1.29.0";
     }
+  }
+  if (types.includes("net_production") && obisCode === "1-65:2.29.9") {
+    return "1-1:2.29.0";
   }
   return obisCode;
 }

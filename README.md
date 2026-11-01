@@ -187,9 +187,12 @@ Each configured Leneda metering point can have one or more roles. Choose the rol
 
 | Role | Use it for | Notes |
 |---|---|---|
-| `Consumption` | House/grid import meter. | This is the meter used for home usage and supplier-billed import. |
-| `Solar production` | PV generation, including energy that may be self-consumed. | Use this only for meters that report energy produced by the PV system. |
-| `Grid export` | Export-only meter for energy sold or sent to the grid. | Use this when the meter reports energy sent out to the grid, not additional PV generation. |
+| `Consumption` | House/grid import meter. | This is the meter used for grid import. |
+| `Solar production` | Total PV generation, including energy that may be self-consumed. | Use this for the meter reporting total PV generation. |
+| `Solar production (consumption-metered)` | Total PV generation reported on the active-consumption OBIS register. | Use when the PV meter reports production on `1-1:1.29.0` instead of `1-1:2.29.0`. |
+| `Grid export` | Export-only meter for energy sent to the grid. | Use when export is reported on the standard export register. |
+| `Grid export (consumption-metered)` | Export reported on the active-consumption OBIS register. | Use when export is reported on `1-1:1.29.0`. |
+| `Net production / surplus export (production-metered)` | Surplus remaining after household consumption, reported on the production register. | Use when the net-production meter reports `1-1:2.29.0`, while a separate meter reports total PV production on the same OBIS code. It is routed as export, never added to total production. |
 | `Gas` | Gas consumption meter. | Only needed when gas data is available. |
 
 Common setups:
@@ -197,6 +200,7 @@ Common setups:
 - One bidirectional electricity meter with production/export data: mark it as `Consumption` and `Solar production`.
 - Separate house and PV meters: mark the house meter as `Consumption`, and each raw PV meter as `Solar production`.
 - Separate PV production and sold/export meter: mark the raw PV meter as `Solar production`, and the export-only meter as `Grid export`.
+- Total production and net production both reported on `1-1:2.29.0`: mark the total meter as `Solar production` and the surplus meter as `Net production / surplus export (production-metered)`.
 - Do not mark an export-only/sold-to-grid meter as `Solar production`, because that makes exported energy look like extra solar generation.
 
 ## Standalone Setup

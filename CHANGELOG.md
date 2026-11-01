@@ -3,6 +3,14 @@
 All notable changes to the **Leneda HACS Integration** will be documented in this file.
 
 
+## [Unreleased]
+
+### Features
+- **Net Production / Surplus Export Meter Role:** Added `net_production` for Leneda installations where the surplus remaining after household consumption is reported on the production OBIS register (`1-1:2.29.0`). The meter is routed as export for self-consumption calculations and is never added to total solar production. Added the role to the Home Assistant configuration/options flow, dashboard settings, and standalone proxy.
+
+### Bug Fixes
+- **Self-Consumption with Production-Metered Export:** Export aggregation, historical OBIS sensors, custom-range dashboard queries, and timeseries endpoints now apply the per-meter OBIS mapping consistently, allowing total production and net production to be read independently even when both use `1-1:2.29.0`.
+
 ## [v2.19.3] - 2026-10-10
 
 ### Bug Fixes

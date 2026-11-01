@@ -80,6 +80,8 @@ class LenedaDataUpdateCoordinator(DataUpdateCoordinator):
         self.export_meters: list[str] = []
         self.solar_consumption_meters: list[str] = []
         self.export_consumption_meters: list[str] = []
+        # Export meters whose surplus is exposed on the standard production OBIS.
+        self.net_production_meters: list[str] = []
 
         for mid, types in meters:
             if "consumption" in types:
@@ -98,6 +100,13 @@ class LenedaDataUpdateCoordinator(DataUpdateCoordinator):
                 self.export_meter = mid
                 self.export_meters.append(mid)
                 self.export_consumption_meters.append(mid)
+            if "net_production" in types:
+                # Leneda links this meter to total production in the portal, but
+                # the relationship is not available in the API. Its 1-1:2.29.0
+                # register is the surplus remaining after local consumption.
+                self.export_meter = mid
+                self.export_meters.append(mid)
+                self.net_production_meters.append(mid)
             if "gas" in types:
                 self.gas_meter = mid
 
@@ -125,13 +134,21 @@ class LenedaDataUpdateCoordinator(DataUpdateCoordinator):
     def _meter_for_obis(self, obis_code: str) -> str:
         """Return the correct metering point ID for a given OBIS code.
 
-        Production codes (1-1:2.*, 1-1:4.*, 1-65:2.*) → production meter
-        Gas codes (7-*) → gas meter
-        Everything else → consumption meter
+        Production codes (1-1:2.*, 1-1:4.*) → total-production meter
+        Remaining production (1-65:2.29.9) → net-production/export meter
+        Sharing production layers (1-65:2.29.1–.4) → total-production meter
+        Gas codes (7-*) → gas meter; other codes → consumption meter
         """
         if obis_code.startswith("7-"):
             return self.gas_meter
         if obis_code.startswith("1-65:2."):
+            # The remaining-production register can be supplied by a dedicated
+            # net-production meter. Sharing-layer production registers still
+            # belong to the total-production meter, not that surplus meter.
+            if obis_code == "1-65:2.29.9" and self.net_production_meters:
+                return self.net_production_meters[0]
+            if self.net_production_meters:
+                return self.production_meter
             return self.export_meter
         if (obis_code.startswith("1-1:2.") or
             obis_code.startswith("1-1:4.")):
@@ -145,6 +162,8 @@ class LenedaDataUpdateCoordinator(DataUpdateCoordinator):
           active-consumption register (1-1:1.29.0) instead of 1-1:2.29.0.
         export_consumption: Grid-export meter wired such that export reads on
           the active-consumption register (1-1:1.29.0) instead of 1-65:2.29.9.
+        net_production: surplus/export meter whose export reads on the standard
+          production register (1-1:2.29.0), not the sharing export register.
         """
         if meter_id in self.solar_consumption_meters:
             if obis_code == "1-1:2.29.0":
@@ -154,6 +173,9 @@ class LenedaDataUpdateCoordinator(DataUpdateCoordinator):
         if meter_id in self.export_consumption_meters:
             if obis_code in ("1-65:2.29.9", "1-1:2.29.0"):
                 return "1-1:1.29.0"
+        if meter_id in self.net_production_meters:
+            if obis_code == "1-65:2.29.9":
+                return "1-1:2.29.0"
         return obis_code
 
     def _calculate_power_overage(self, items: list[dict], ref_power_kw: float, production_items: list[dict] | None = None) -> float:
@@ -375,7 +397,7 @@ class LenedaDataUpdateCoordinator(DataUpdateCoordinator):
                         yesterday_start_dt, yesterday_end_dt
                     ),
                     self.api_client.async_get_aggregated_metering_data(
-                        self._meter_for_obis(EXPORT_CODE), EXPORT_CODE, yesterday_start_dt, yesterday_end_dt
+                        self._meter_for_obis(EXPORT_CODE), self._get_obis_for_meter(self._meter_for_obis(EXPORT_CODE), EXPORT_CODE), yesterday_start_dt, yesterday_end_dt
                     ),
                     self.api_client.async_get_aggregated_metering_data(
                         self._meter_for_obis(IMPORT_CODE), IMPORT_CODE, yesterday_start_dt, yesterday_end_dt
@@ -390,7 +412,7 @@ class LenedaDataUpdateCoordinator(DataUpdateCoordinator):
                         week_start_dt, effective_week_end
                     ),
                     self.api_client.async_get_aggregated_metering_data(
-                        self._meter_for_obis(EXPORT_CODE), EXPORT_CODE, week_start_dt, effective_week_end
+                        self._meter_for_obis(EXPORT_CODE), self._get_obis_for_meter(self._meter_for_obis(EXPORT_CODE), EXPORT_CODE), week_start_dt, effective_week_end
                     ),
                     self.api_client.async_get_aggregated_metering_data(
                         self._meter_for_obis(IMPORT_CODE), IMPORT_CODE, week_start_dt, effective_week_end
@@ -405,7 +427,7 @@ class LenedaDataUpdateCoordinator(DataUpdateCoordinator):
                         last_week_start_dt, last_week_end_dt
                     ),
                     self.api_client.async_get_aggregated_metering_data(
-                        self._meter_for_obis(EXPORT_CODE), EXPORT_CODE, last_week_start_dt, last_week_end_dt
+                        self._meter_for_obis(EXPORT_CODE), self._get_obis_for_meter(self._meter_for_obis(EXPORT_CODE), EXPORT_CODE), last_week_start_dt, last_week_end_dt
                     ),
                     self.api_client.async_get_aggregated_metering_data(
                         self._meter_for_obis(IMPORT_CODE), IMPORT_CODE, last_week_start_dt, last_week_end_dt
@@ -420,7 +442,7 @@ class LenedaDataUpdateCoordinator(DataUpdateCoordinator):
                         month_start_dt, effective_month_end
                     ),
                     self.api_client.async_get_aggregated_metering_data(
-                        self._meter_for_obis(EXPORT_CODE), EXPORT_CODE, month_start_dt, effective_month_end
+                        self._meter_for_obis(EXPORT_CODE), self._get_obis_for_meter(self._meter_for_obis(EXPORT_CODE), EXPORT_CODE), month_start_dt, effective_month_end
                     ),
                     self.api_client.async_get_aggregated_metering_data(
                         self._meter_for_obis(IMPORT_CODE), IMPORT_CODE, month_start_dt, effective_month_end
@@ -435,7 +457,7 @@ class LenedaDataUpdateCoordinator(DataUpdateCoordinator):
                         start_of_last_month, end_of_last_month
                     ),
                     self.api_client.async_get_aggregated_metering_data(
-                        self._meter_for_obis(EXPORT_CODE), EXPORT_CODE, start_of_last_month, end_of_last_month
+                        self._meter_for_obis(EXPORT_CODE), self._get_obis_for_meter(self._meter_for_obis(EXPORT_CODE), EXPORT_CODE), start_of_last_month, end_of_last_month
                     ),
                 ]
 
@@ -464,7 +486,7 @@ class LenedaDataUpdateCoordinator(DataUpdateCoordinator):
                     for meter_id in self.export_meters[1:]:
                         for start, end, prod_key, export_key in period_ranges:
                             extra_prod_tasks.append(self.api_client.async_get_aggregated_metering_data(
-                                meter_id, EXPORT_CODE, start, end
+                                meter_id, self._get_obis_for_meter(meter_id, EXPORT_CODE), start, end
                             ))
                             extra_prod_map.append(export_key)
 
@@ -503,8 +525,17 @@ class LenedaDataUpdateCoordinator(DataUpdateCoordinator):
 
                 # Add tasks for sharing codes for last month
                 for key, code in SHARING_CODES.items():
+                    # With a separate net-production meter, community sharing
+                    # layers remain associated with total production. Only the
+                    # remaining-production/export register is routed to the
+                    # dedicated net-production meter.
+                    sharing_meter = (
+                        self.production_meter
+                        if self.net_production_meters and key.startswith("s_p_")
+                        else self._meter_for_obis(code)
+                    )
                     aggregated_tasks.append(self.api_client.async_get_aggregated_metering_data(
-                        self._meter_for_obis(code), code, start_of_last_month, end_of_last_month
+                        sharing_meter, code, start_of_last_month, end_of_last_month
                     ))
 
                 aggregated_keys = [
