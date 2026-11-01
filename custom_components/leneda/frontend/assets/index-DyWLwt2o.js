@@ -2489,7 +2489,7 @@ var _a=Object.defineProperty;var xa=(t,e,s)=>e in t?_a(t,e,{enumerable:!0,config
       <div class="navbar-brand">
         <img src="/leneda-panel/static/logo.png" srcset="/leneda-panel/static/logo@2x.png 2x" alt="Leneda Logo" class="navbar-logo-img" />
         ${n?`<span class="navbar-badge" title="Where this dashboard gets its data">${n}</span>`:""}
-        <span class="navbar-version" title="Dashboard version">v2.19.3</span>
+        <span class="navbar-version" title="Dashboard version">v2.20.0</span>
 
         <button class="menu-toggle ${s?"open":""}" aria-label="Toggle menu" aria-expanded="${s}">
           <span></span>

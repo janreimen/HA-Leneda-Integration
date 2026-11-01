@@ -5,6 +5,8 @@ All notable changes to the **Leneda HACS Integration** will be documented in thi
 
 ## [Unreleased]
 
+## [v2.20.0] - 2026-11-01
+
 ### Features
 - **Net Production / Surplus Export Meter Role:** Added `net_production` for Leneda installations where the surplus remaining after household consumption is reported on the production OBIS register (`1-1:2.29.0`). The meter is routed as export for self-consumption calculations and is never added to total solar production. Added the role to the Home Assistant configuration/options flow, dashboard settings, and standalone proxy.
 
