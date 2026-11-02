@@ -417,7 +417,7 @@ function renderDesktop(data: EnergyFlowSceneData, max: number): string {
     prefix, x: 110, y: 290, r: 40, glyph: "grid", color: "var(--clr-consumption)",
     text: "below",
     kicker: "Grid",
-    value: `${fmtNum(data.boughtFromGrid + data.soldToMarket)} kWh`,
+    value: `${fmtNum(Math.abs(data.boughtFromGrid - data.soldToMarket))} kWh`,
     detail: `In ${fmtNum(data.boughtFromGrid)} · out ${fmtNum(data.soldToMarket)}`,
   })}
 

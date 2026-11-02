@@ -264,7 +264,7 @@ export function renderDashboard(state: AppState): string {
         ${statCard({
       modifier: "consumption",
       icon: "consumption",
-      label: "Grid Consumption",
+      label: "Energy bought from the Grid",
       value: fmtNum(consumption),
       unit: "kWh",
       hint: "Electricity imported from the grid",
