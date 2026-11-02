@@ -558,6 +558,13 @@ a:hover {
   font-variant-numeric: tabular-nums;
 }
 
+.house-total-detail {
+  fill: var(--clr-muted);
+  font-size: 8px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── Flow links ────────────────────────────────────────────────── */
 /* A dim track shows the route; dashes travelling along it show the
    direction. Both take their hue from the group's `color`, so a link

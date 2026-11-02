@@ -103,7 +103,7 @@ var _a=Object.defineProperty;var xa=(t,e,s)=>e in t?_a(t,e,{enumerable:!0,config
         fill="none"
       />`}
     </g>
-  `}function Rs(t){const{cx:e,apexY:s,eavesY:a,baseY:n,halfWidth:o,ringY:r,ringR:i,coverage:d,usageLabel:p,usageValue:y,prefix:w}=t,b=e-o,l=e+o,g=Math.round(o*.09),m=(a-s)/o,S={x:e+o*.16,y:s+o*.16*m+9},k={x:e+o*.7,y:s+o*.7*m+9},_=Math.hypot(k.x-S.x,k.y-S.y),C=Math.atan2(k.y-S.y,k.x-S.x)*180/Math.PI,M=Math.max(6,o*.1),c=4,v=2*Math.PI*(i-5),h=Math.min(100,Math.max(0,d));return`
+  `}function Rs(t){const{cx:e,apexY:s,eavesY:a,baseY:n,halfWidth:o,ringY:r,ringR:i,coverage:d,usageLabel:p,usageValue:y,usageDetail:q,prefix:w}=t,b=e-o,l=e+o,g=Math.round(o*.09),m=(a-s)/o,S={x:e+o*.16,y:s+o*.16*m+9},k={x:e+o*.7,y:s+o*.7*m+9},_=Math.hypot(k.x-S.x,k.y-S.y),C=Math.atan2(k.y-S.y,k.x-S.x)*180/Math.PI,M=Math.max(6,o*.1),c=4,v=2*Math.PI*(i-5),h=Math.min(100,Math.max(0,d));return`
     <g class="elite-house">
       <ellipse cx="${e}" cy="${n+10}" rx="${o*1.5}" ry="${Math.max(10,o*.16)}" fill="url(#${w}-house-shadow)" />
 
@@ -156,6 +156,7 @@ var _a=Object.defineProperty;var xa=(t,e,s)=>e in t?_a(t,e,{enumerable:!0,config
       ${p&&y?`
       <text x="${e}" y="${n-30}" text-anchor="middle" class="house-total-label">${p}</text>
       <text x="${e}" y="${n-10}" text-anchor="middle" class="house-total-value">${y}</text>
+      ${q ? `<text x="${e}" y="${n+8}" text-anchor="middle" class="house-total-detail">${q}</text>` : ""}
       `:""}
     </g>
   `}function As(t){return`
@@ -215,7 +216,7 @@ var _a=Object.defineProperty;var xa=(t,e,s)=>e in t?_a(t,e,{enumerable:!0,config
       ${As(n)}
       ${Vs(n,16,16,868,a-32,30)}
 
-      ${Rs({cx:450,apexY:o,eavesY:256,baseY:r,halfWidth:i,ringY:296,ringR:34,coverage:t.selfSufficiency,usageLabel:"Home usage",usageValue:`${u(t.totalHomeEnergy)} kWh`,prefix:n})}
+      ${Rs({cx:450,apexY:o,eavesY:256,baseY:r,halfWidth:i,ringY:296,ringR:34,coverage:t.selfSufficiency,usageLabel:"Home usage",usageValue:`${u(t.totalHomeEnergy)} kWh`,usageDetail:`${u(t.boughtFromGrid)} grid + ${u(t.solarToHome)} self-consumed solar`,prefix:n})}
 
       ${ce({prefix:n,x:450,y:82,r:40,glyph:"solar",color:"var(--clr-production)",text:"right",kicker:"Solar",value:`${u(t.production)} kWh`,detail:`${u(t.solarToHome)} kWh used at home`})}
 
@@ -325,7 +326,7 @@ var _a=Object.defineProperty;var xa=(t,e,s)=>e in t?_a(t,e,{enumerable:!0,config
       `);case"ok":return e(`
         <circle cx="12" cy="12" r="8" />
         <path d="M8.5 12.5L11 15L15.5 9.5" />
-      `)}}function Ia(t){var ee,U,ae,ye,xe,Fe,Pe,Re;const e=t.rangeData,s=(e==null?void 0:e.consumption)??0,a=(e==null?void 0:e.production)??0,n=(e==null?void 0:e.exported)??0,o=(e==null?void 0:e.self_consumed)??0,r=(e==null?void 0:e.gas_energy)??0,i=(e==null?void 0:e.gas_volume)??0,d=(e==null?void 0:e.peak_power_kw)??0,p=(e==null?void 0:e.shared_with_me)??0,y=(e==null?void 0:e.shared)??0,w=Math.max(0,n),b=(e==null?void 0:e.grid_import)!=null?Math.max(0,s-e.grid_import):void 0,l=Math.max(0,(e==null?void 0:e.solar_to_home)??(e==null?void 0:e.direct_solar_to_home)??(o>0?o:a-w),b??0),g=Math.max(0,(e==null?void 0:e.direct_solar_to_home)??Math.max(0,l-p)),m=l,S=Math.max(0,(e==null?void 0:e.grid_import)??s-l),k=s>0?s:S+l,_=!!((ee=t.config)!=null&&ee.meter_has_gas||(((U=t.config)==null?void 0:U.meters)??[]).some(j=>j.types.includes("gas"))),C=y+p,M=k>0?Math.min(100,l/k*100):0,c=Math.max(k,a,S,w,y,p,g,1),v=_?Math.min(Math.max(0,r),c):0,h=j=>j>0?Math.max(18,Math.round(j/c*100)):0,f={production:a,directSolarToHome:g,solarToHome:l,boughtFromGrid:S,soldToMarket:w,shared:y,sharedWithMe:p,communityExchange:C,totalHomeEnergy:k,selfSufficiency:M,gasEnergy:r,gasVolume:i,hasGas:_},$=e!=null&&e.start&&(e!=null&&e.end)?`${de(e.start)} — ${de(e.end)}`:t.range==="custom"&&t.customStart&&t.customEnd?`${de(t.customStart+"T00:00:00")} — ${de(t.customEnd+"T00:00:00")}`:((ae=Rt.find(j=>j.id===t.range))==null?void 0:ae.label)??"Yesterday",E=(xe=(ye=t.consumptionTimeseries)==null?void 0:ye.items)!=null&&xe.length?t.consumptionTimeseries.items:((Fe=t.productionTimeseries)==null?void 0:Fe.items)??[],D=t.chartViewportStart??((Pe=E[0])==null?void 0:Pe.startedAt)??(e==null?void 0:e.start),K=t.chartViewportEnd??((Re=E[E.length-1])==null?void 0:Re.startedAt)??(e==null?void 0:e.end),L=Tt(D,K),F=Is(t.chartTimeBucket),I=Va(D,K),H=Hs(D,K,t.chartTimeBucket,1),N=new Date,Q=!H||H.start.getTime()>N.getTime(),pe=et.map(j=>{const fe=We(j.id,L),it=j.id===t.chartTimeBucket,Ae=j.id==="quarter_hour"?"15-minute detail would be too dense for this selected period":`${j.label} detail does not add useful resolution for this selected period`;return`
+      `)}}function Ia(t){var ee,U,ae,ye,xe,Fe,Pe,Re;const e=t.rangeData,s=(e==null?void 0:e.consumption)??0,a=(e==null?void 0:e.production)??0,n=(e==null?void 0:e.exported)??0,o=(e==null?void 0:e.self_consumed)??0,r=(e==null?void 0:e.gas_energy)??0,i=(e==null?void 0:e.gas_volume)??0,d=(e==null?void 0:e.peak_power_kw)??0,p=(e==null?void 0:e.shared_with_me)??0,y=(e==null?void 0:e.shared)??0,w=Math.max(0,n),b=(e==null?void 0:e.grid_import)!=null?Math.max(0,s-e.grid_import):void 0,l=Math.max(0,(e==null?void 0:e.solar_to_home)??(e==null?void 0:e.direct_solar_to_home)??(o>0?o:a-w),b??0),g=Math.max(0,(e==null?void 0:e.direct_solar_to_home)??Math.max(0,l-p)),m=l,S=Math.max(0,s),k=S+l,_=!!((ee=t.config)!=null&&ee.meter_has_gas||(((U=t.config)==null?void 0:U.meters)??[]).some(j=>j.types.includes("gas"))),C=y+p,M=k>0?Math.min(100,l/k*100):0,c=Math.max(k,a,S,w,y,p,g,1),v=_?Math.min(Math.max(0,r),c):0,h=j=>j>0?Math.max(18,Math.round(j/c*100)):0,f={production:a,directSolarToHome:g,solarToHome:l,boughtFromGrid:S,soldToMarket:w,shared:y,sharedWithMe:p,communityExchange:C,totalHomeEnergy:k,selfSufficiency:M,gasEnergy:r,gasVolume:i,hasGas:_},$=e!=null&&e.start&&(e!=null&&e.end)?`${de(e.start)} — ${de(e.end)}`:t.range==="custom"&&t.customStart&&t.customEnd?`${de(t.customStart+"T00:00:00")} — ${de(t.customEnd+"T00:00:00")}`:((ae=Rt.find(j=>j.id===t.range))==null?void 0:ae.label)??"Yesterday",E=(xe=(ye=t.consumptionTimeseries)==null?void 0:ye.items)!=null&&xe.length?t.consumptionTimeseries.items:((Fe=t.productionTimeseries)==null?void 0:Fe.items)??[],D=t.chartViewportStart??((Pe=E[0])==null?void 0:Pe.startedAt)??(e==null?void 0:e.start),K=t.chartViewportEnd??((Re=E[E.length-1])==null?void 0:Re.startedAt)??(e==null?void 0:e.end),L=Tt(D,K),F=Is(t.chartTimeBucket),I=Va(D,K),H=Hs(D,K,t.chartTimeBucket,1),N=new Date,Q=!H||H.start.getTime()>N.getTime(),pe=et.map(j=>{const fe=We(j.id,L),it=j.id===t.chartTimeBucket,Ae=j.id==="quarter_hour"?"15-minute detail would be too dense for this selected period":`${j.label} detail does not add useful resolution for this selected period`;return`
             <button
               class="unit-btn chart-bucket-btn ${it?"active":""}"
               data-chart-bucket="${j.id}"
@@ -347,7 +348,7 @@ var _a=Object.defineProperty;var xa=(t,e,s)=>e in t?_a(t,e,{enumerable:!0,config
 
       <!-- Stat Cards -->
       <div class="stats-grid">
-        ${V({modifier:"consumption",icon:"consumption",label:"Consumption",value:u(s),unit:"kWh",hint:"Everything the house used"})}
+        ${V({modifier:"consumption",icon:"consumption",label:"Grid Consumption",value:u(s),unit:"kWh",hint:"Electricity imported from the grid"})}
         ${V({modifier:"production",icon:"production",label:"Production",value:u(a),unit:"kWh",hint:"Total generated by your panels"})}
         ${V({modifier:"export",icon:"export",label:"Exported",value:u(n),unit:"kWh",hint:"Surplus sold back to the grid"})}
         ${V({modifier:"self-consumed",icon:"self_consumed",label:"Self-Consumed",value:u(m),unit:"kWh",hint:"Solar used at home instead of bought"})}
@@ -371,7 +372,7 @@ var _a=Object.defineProperty;var xa=(t,e,s)=>e in t?_a(t,e,{enumerable:!0,config
                 <span class="mobile-flow-kicker">House</span>
                 <strong class="mobile-flow-house-value">${u(k)} kWh supplied</strong>
                 <span class="mobile-flow-house-meta">
-                  ${u(M,0)}% of home usage solar-covered${d>0?` · Peak ${u(d,2)} kW`:""}
+                  ${u(t.boughtFromGrid)} kWh grid + ${u(t.solarToHome)} kWh self-consumed solar · ${u(M,0)}% solar-covered${d>0?` · Peak ${u(d,2)} kW`:""}
                 </span>
               </div>
 

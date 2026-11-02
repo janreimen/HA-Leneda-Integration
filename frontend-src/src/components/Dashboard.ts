@@ -136,8 +136,10 @@ export function renderDashboard(state: AppState): string {
     d?.direct_solar_to_home ?? Math.max(0, solarToHome - sharedWithMe),
   );
   const selfConsumed = solarToHome;
-  const boughtFromGrid = Math.max(0, d?.grid_import ?? (consumption - solarToHome));
-  const totalHomeEnergy = consumption > 0 ? consumption : boughtFromGrid + solarToHome;
+  // The consumption meter measures electricity imported from the grid.
+  // Total home usage must include that import plus solar consumed locally.
+  const boughtFromGrid = Math.max(0, consumption);
+  const totalHomeEnergy = boughtFromGrid + solarToHome;
   const hasGasMeter = Boolean(
     state.config?.meter_has_gas ||
       (state.config?.meters ?? []).some((meter) => meter.types.includes("gas")),
@@ -262,10 +264,10 @@ export function renderDashboard(state: AppState): string {
         ${statCard({
       modifier: "consumption",
       icon: "consumption",
-      label: "Consumption",
+      label: "Grid Consumption",
       value: fmtNum(consumption),
       unit: "kWh",
-      hint: "Everything the house used",
+      hint: "Electricity imported from the grid",
     })}
         ${statCard({
       modifier: "production",
@@ -311,7 +313,7 @@ export function renderDashboard(state: AppState): string {
                 <span class="mobile-flow-kicker">House</span>
                 <strong class="mobile-flow-house-value">${fmtNum(totalHomeEnergy)} kWh supplied</strong>
                 <span class="mobile-flow-house-meta">
-                  ${fmtNum(selfSufficiency, 0)}% of home usage solar-covered${peakPower > 0 ? ` · Peak ${fmtNum(peakPower, 2)} kW` : ""}
+                  ${fmtNum(boughtFromGrid)} kWh grid + ${fmtNum(solarToHome)} kWh self-consumed solar · ${fmtNum(selfSufficiency, 0)}% solar-covered${peakPower > 0 ? ` · Peak ${fmtNum(peakPower, 2)} kW` : ""}
                 </span>
               </div>
 

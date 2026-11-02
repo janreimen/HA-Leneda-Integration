@@ -216,13 +216,14 @@ interface HouseOptions {
   coverage: number;
   usageLabel?: string;
   usageValue?: string;
+  usageDetail?: string;
   prefix: string;
 }
 
 function renderHouse(options: HouseOptions): string {
   const {
     cx, apexY, eavesY, baseY, halfWidth, ringY, ringR,
-    coverage, usageLabel, usageValue, prefix,
+    coverage, usageLabel, usageValue, usageDetail, prefix,
   } = options;
 
   const left = cx - halfWidth;
@@ -298,6 +299,7 @@ function renderHouse(options: HouseOptions): string {
       ${usageLabel && usageValue ? `
       <text x="${cx}" y="${baseY - 30}" text-anchor="middle" class="house-total-label">${usageLabel}</text>
       <text x="${cx}" y="${baseY - 10}" text-anchor="middle" class="house-total-value">${usageValue}</text>
+      ${usageDetail ? `<text x="${cx}" y="${baseY + 8}" text-anchor="middle" class="house-total-detail">${usageDetail}</text>` : ""}
       ` : ""}
     </g>
   `;
@@ -399,6 +401,7 @@ function renderDesktop(data: EnergyFlowSceneData, max: number): string {
     coverage: data.selfSufficiency,
     usageLabel: "Home usage",
     usageValue: `${fmtNum(data.totalHomeEnergy)} kWh`,
+    usageDetail: `${fmtNum(data.boughtFromGrid)} grid + ${fmtNum(data.solarToHome)} self-consumed solar`,
     prefix,
   })}
 
